@@ -1,0 +1,413 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; connect-src https://script.google.com https://script.googleusercontent.com; img-src data:; base-uri 'none'; form-action 'none'">
+<title>Welder Qualification Verification</title>
+<link rel="icon" href="data:,">
+<style>
+:root {
+  --bg: #f3f5f8; --surface: #ffffff; --text: #14202e; --muted: #5a6877; --line: #d9dfe7;
+  --brand: #0b4f8a; --brand-text: #ffffff;
+  --ok: #17692f; --ok-bg: #e3f4e8;
+  --warn: #8a5a00; --warn-bg: #fff2cf;
+  --bad: #a6231b; --bad-bg: #fde6e4;
+  --neutral: #4a5766; --neutral-bg: #e8ecf1;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0f1620; --surface: #18222f; --text: #e9eef4; --muted: #a2afbd; --line: #2c3a4b;
+    --brand: #6db2ee; --brand-text: #0b1a2a;
+    --ok: #7fdc99; --ok-bg: #163a24;
+    --warn: #f2c15c; --warn-bg: #3d2f0c;
+    --bad: #ff9d96; --bad-bg: #44201d;
+    --neutral: #b5c0cc; --neutral-bg: #26323f;
+  }
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--text);
+  font: 16px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+.wrap { max-width: 560px; margin: 0 auto; padding: 0 16px 32px; }
+header.top {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 14px 0 10px;
+}
+.brand { font-weight: 700; letter-spacing: .02em; color: var(--brand); }
+.brand small { display: block; font-weight: 500; color: var(--muted); letter-spacing: 0; font-size: 13px; }
+button, input { font: inherit; }
+.lang {
+  min-height: 44px; padding: 0 14px; border-radius: 22px; cursor: pointer;
+  border: 1px solid var(--line); background: var(--surface); color: var(--text);
+}
+h1.page-title { font-size: 18px; margin: 4px 0 14px; color: var(--muted); font-weight: 600; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px; }
+.welder-name { font-size: 24px; line-height: 1.2; margin: 0 0 6px; overflow-wrap: anywhere; }
+.chip {
+  display: inline-block; padding: 2px 10px; border-radius: 12px; font-weight: 600;
+  background: var(--neutral-bg); color: var(--neutral); font-size: 14px;
+}
+.summary { margin: 12px 0 0; color: var(--muted); font-size: 15px; }
+.cards { display: grid; gap: 12px; margin-top: 14px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-left-width: 8px; border-radius: 14px; padding: 14px 16px; }
+.card.s-valid { border-left-color: var(--ok); }
+.card.s-dueSoon, .card.s-expiringSoon { border-left-color: var(--warn); }
+.card.s-overdue, .card.s-expired { border-left-color: var(--bad); }
+.card.s-unknown { border-left-color: var(--neutral); }
+.badge {
+  display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 20px;
+  font-weight: 700; font-size: 16px;
+}
+.badge .ico { width: 22px; height: 22px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 14px; background: currentColor; }
+.badge .ico span { color: var(--surface); line-height: 1; }
+.s-valid .badge { color: var(--ok); background: var(--ok-bg); }
+.s-dueSoon .badge, .s-expiringSoon .badge { color: var(--warn); background: var(--warn-bg); }
+.s-overdue .badge, .s-expired .badge { color: var(--bad); background: var(--bad-bg); }
+.s-unknown .badge { color: var(--neutral); background: var(--neutral-bg); }
+.process { font-size: 22px; margin: 10px 0 8px; }
+dl { display: grid; grid-template-columns: 1fr; gap: 8px 12px; margin: 0; }
+dl div { display: flex; justify-content: space-between; gap: 12px; border-top: 1px solid var(--line); padding-top: 8px; }
+dt { color: var(--muted); }
+dd { margin: 0; font-weight: 600; text-align: right; overflow-wrap: anywhere; }
+.message { text-align: center; padding: 24px 16px; }
+.message h2 { margin: 0 0 8px; font-size: 20px; }
+.message p { margin: 0 0 14px; color: var(--muted); }
+.spinner { width: 34px; height: 34px; margin: 0 auto 10px; border-radius: 50%; border: 4px solid var(--line); border-top-color: var(--brand); animation: spin 0.9s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .spinner { animation-duration: 3s; } }
+form.lookup { margin-top: 18px; }
+form.lookup label { display: block; font-weight: 600; margin-bottom: 6px; }
+.row { display: flex; gap: 8px; }
+input[type=text] {
+  flex: 1; min-width: 0; min-height: 48px; padding: 0 12px; border-radius: 10px;
+  border: 1px solid var(--line); background: var(--surface); color: var(--text); text-transform: uppercase;
+}
+.btn {
+  min-height: 48px; padding: 0 18px; border-radius: 10px; border: 0; cursor: pointer;
+  background: var(--brand); color: var(--brand-text); font-weight: 700;
+}
+.btn.secondary { background: var(--surface); color: var(--text); border: 1px solid var(--line); }
+.hint { margin: 6px 0 0; color: var(--muted); font-size: 14px; }
+footer { margin-top: 22px; color: var(--muted); font-size: 13px; }
+footer p { margin: 4px 0; }
+:focus-visible { outline: 3px solid var(--brand); outline-offset: 2px; }
+[hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">CS Wind Vietnam<small data-i18n="appTitle">Welder Qualification Verification</small></div>
+    <button id="langBtn" class="lang" type="button" aria-label="Language / Ngôn ngữ">Tiếng Việt</button>
+  </header>
+
+  <main id="main" aria-live="polite">
+    <section id="viewLoading" class="panel message" hidden>
+      <div class="spinner" aria-hidden="true"></div>
+      <p data-i18n="loading">Loading…</p>
+    </section>
+    <section id="viewMessage" class="panel message" hidden>
+      <h2 id="msgTitle"></h2>
+      <p id="msgText"></p>
+      <button id="retryBtn" class="btn" type="button" hidden></button>
+    </section>
+    <section id="viewResult" hidden></section>
+  </main>
+
+  <form id="lookupForm" class="lookup" autocomplete="off" novalidate>
+    <label for="welderId" id="lookupLabel" data-i18n="lookupLabel">Welder ID</label>
+    <div class="row">
+      <input id="welderId" type="text" maxlength="20" autocapitalize="characters" autocorrect="off" spellcheck="false" enterkeyhint="search">
+      <button class="btn" type="submit" data-i18n="lookupButton">Check</button>
+    </div>
+    <p class="hint" data-i18n="lookupHint">Enter the Welder ID printed on the helmet.</p>
+  </form>
+
+  <footer>
+    <p id="checkedOn"></p>
+    <p data-i18n="footer">Data is refreshed once a day from the company's official welder register. For verification purposes only.</p>
+  </footer>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  // ---- configuration -------------------------------------------------------
+  var API_URL = 'https://script.google.com/macros/s/AKfycbwVhK2ddQszjGzdM3MzGH5PbbnuATpGCeqE41sCz_OG8n1pmnm9wYXm_gXjferaojSs4Q/exec';
+  var ID_PATTERN = /^CS\d+(?:-\d+)?$/;
+  var TIME_ZONE = 'Asia/Ho_Chi_Minh';
+  var DUE_SOON_DAYS = 30;
+  var REQUEST_TIMEOUT_MS = 20000;
+
+  var TEXT = {
+    en: {
+      appTitle: 'Welder Qualification Verification',
+      lookupLabel: 'Welder ID', lookupButton: 'Check', lookupHint: 'Enter the Welder ID printed on the helmet.',
+      loading: 'Loading…',
+      welderId: 'Welder ID', summary: 'Valid qualifications: {n} / {m}',
+      standard: 'Standard', process: 'Welding process', weldType: 'Weld type',
+      lastValidation: 'Last validation', nextProlongation: 'Next prolongation due', expiry: 'Expiry date',
+      bw: 'Butt weld (BW)', fw: 'Fillet weld (FW)',
+      valid: 'Valid', dueSoon: 'Prolongation due soon', expiringSoon: 'Expires soon',
+      overdue: 'Prolongation overdue', expired: 'Expired', unknown: 'Status unavailable',
+      notFoundTitle: 'No public record found',
+      notFoundText: 'There is no public record for this Welder ID. Check the ID printed on the helmet or contact the QC department.',
+      invalidTitle: 'Invalid Welder ID', invalidText: 'The Welder ID format is not valid. Example: CS171.',
+      errorTitle: 'Could not load the data', errorText: 'Check your internet connection and try again.', retry: 'Try again',
+      footer: "Data is refreshed once a day from the company's official welder register. For verification purposes only.",
+      checkedOn: 'Checked on {date}', langName: 'Tiếng Việt'
+    },
+    vi: {
+      appTitle: 'Xác minh chứng chỉ thợ hàn',
+      lookupLabel: 'Mã thợ hàn', lookupButton: 'Kiểm tra', lookupHint: 'Nhập mã thợ hàn in trên mũ bảo hộ.',
+      loading: 'Đang tải…',
+      welderId: 'Mã thợ hàn', summary: 'Chứng chỉ còn hiệu lực: {n} / {m}',
+      standard: 'Tiêu chuẩn', process: 'Phương pháp hàn', weldType: 'Loại mối hàn',
+      lastValidation: 'Xác nhận gần nhất', nextProlongation: 'Hạn gia hạn tiếp theo', expiry: 'Ngày hết hiệu lực',
+      bw: 'Mối hàn giáp mép (BW)', fw: 'Mối hàn góc (FW)',
+      valid: 'Còn hiệu lực', dueSoon: 'Sắp đến hạn gia hạn', expiringSoon: 'Sắp hết hiệu lực',
+      overdue: 'Quá hạn gia hạn', expired: 'Hết hiệu lực', unknown: 'Chưa xác định trạng thái',
+      notFoundTitle: 'Không tìm thấy hồ sơ công khai',
+      notFoundText: 'Không có hồ sơ công khai cho mã thợ hàn này. Vui lòng kiểm tra mã in trên mũ hoặc liên hệ phòng QC.',
+      invalidTitle: 'Mã thợ hàn không hợp lệ', invalidText: 'Định dạng mã thợ hàn không đúng. Ví dụ: CS171.',
+      errorTitle: 'Không tải được dữ liệu', errorText: 'Vui lòng kiểm tra kết nối internet và thử lại.', retry: 'Thử lại',
+      footer: 'Dữ liệu được cập nhật mỗi ngày từ sổ đăng ký thợ hàn chính thức của công ty. Chỉ dùng để xác minh.',
+      checkedOn: 'Kiểm tra ngày {date}', langName: 'English'
+    }
+  };
+  var MONTHS_EN = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+  // <status-logic>
+  // Pure functions (no DOM): they are unit-tested by tests/public_page/status_logic.test.js
+  function isIsoDate(s) {
+    var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(s));
+    if (!m) { return false; }
+    var d = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3]));
+    return d.getUTCFullYear() === +m[1] && d.getUTCMonth() === +m[2] - 1 && d.getUTCDate() === +m[3];
+  }
+  function dayNumber(iso) {
+    var p = iso.split('-');
+    return Math.round(Date.UTC(+p[0], +p[1] - 1, +p[2]) / 86400000);
+  }
+  function daysBetween(fromIso, toIso) { return dayNumber(toIso) - dayNumber(fromIso); }
+
+  // Status of one qualification on the given calendar day (yyyy-MM-dd, Vietnam time).
+  // valid: ok; dueSoon: next prolongation within 30 days; expiringSoon: final period ends within 30 days;
+  // overdue: prolongation date passed but the qualification has not expired; expired: past the expiry date.
+  function computeStatus(q, today) {
+    if (!q || !isIsoDate(q.nextProlongationDate) || !isIsoDate(q.expiryDate) || !isIsoDate(today)) { return 'unknown'; }
+    var next = q.nextProlongationDate, expiry = q.expiryDate;
+    if (today > expiry) { return 'expired'; }
+    if (today > next) { return 'overdue'; }
+    var finalPeriod = next >= expiry;
+    var end = finalPeriod ? expiry : next;
+    if (daysBetween(today, end) <= DUE_SOON_DAYS) { return finalPeriod ? 'expiringSoon' : 'dueSoon'; }
+    return 'valid';
+  }
+  function isCurrentlyValid(status) { return status === 'valid' || status === 'dueSoon' || status === 'expiringSoon'; }
+  function summarize(quals, today) {
+    var n = 0;
+    for (var i = 0; i < quals.length; i++) { if (isCurrentlyValid(computeStatus(quals[i], today))) { n++; } }
+    return { valid: n, total: quals.length };
+  }
+  function formatDate(iso, lang) {
+    if (!isIsoDate(iso)) { return '–'; }
+    var p = iso.split('-');
+    return lang === 'vi' ? p[2] + '/' + p[1] + '/' + p[0] : p[2] + ' ' + MONTHS_EN[+p[1] - 1] + ' ' + p[0];
+  }
+  function weldTypeKey(code) { return code === 'BW' ? 'bw' : (code === 'FW' ? 'fw' : null); }
+  // </status-logic>
+
+  function todayInVietnam() {
+    try {
+      var s = new Intl.DateTimeFormat('en-CA', { timeZone: TIME_ZONE, year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
+      if (isIsoDate(s)) { return s; }
+    } catch (e) { /* fall through */ }
+    return new Date(Date.now() + 7 * 3600 * 1000).toISOString().slice(0, 10);
+  }
+
+  // ---- state and DOM helpers ----------------------------------------------
+  var el = {
+    main: document.getElementById('main'), loading: document.getElementById('viewLoading'),
+    message: document.getElementById('viewMessage'), result: document.getElementById('viewResult'),
+    msgTitle: document.getElementById('msgTitle'), msgText: document.getElementById('msgText'),
+    retry: document.getElementById('retryBtn'), form: document.getElementById('lookupForm'),
+    input: document.getElementById('welderId'), langBtn: document.getElementById('langBtn'),
+    checkedOn: document.getElementById('checkedOn')
+  };
+  var lang = 'en';
+  var state = { view: 'form' };
+  var requestSeq = 0;
+  var lastId = '';
+
+  function t(key) { return (TEXT[lang] && TEXT[lang][key]) || TEXT.en[key] || key; }
+  function h(tag, cls, text) {
+    var n = document.createElement(tag);
+    if (cls) { n.className = cls; }
+    if (text !== undefined) { n.textContent = text; }
+    return n;
+  }
+  function clear(n) { while (n.firstChild) { n.removeChild(n.firstChild); } }
+
+  function renderStatic() {
+    document.documentElement.lang = lang;
+    var nodes = document.querySelectorAll('[data-i18n]');
+    for (var i = 0; i < nodes.length; i++) { nodes[i].textContent = t(nodes[i].getAttribute('data-i18n')); }
+    el.input.setAttribute('placeholder', lang === 'vi' ? 'ví dụ: CS171' : 'e.g. CS171');
+    el.langBtn.textContent = t('langName');
+    document.title = t('appTitle');
+    el.checkedOn.textContent = t('checkedOn').replace('{date}', formatDate(todayInVietnam(), lang));
+  }
+
+  function renderView() {
+    el.loading.hidden = state.view !== 'loading';
+    el.message.hidden = state.view !== 'message';
+    el.result.hidden = state.view !== 'result';
+    if (state.view === 'message') {
+      el.msgTitle.textContent = t(state.titleKey);
+      el.msgText.textContent = t(state.textKey);
+      el.retry.hidden = !state.retry;
+      el.retry.textContent = t('retry');
+    }
+    if (state.view === 'result') { renderResult(state.welder); }
+  }
+
+  function addRow(dl, label, value) {
+    var row = h('div');
+    row.appendChild(h('dt', null, label));
+    row.appendChild(h('dd', null, value));
+    dl.appendChild(row);
+  }
+
+  function renderResult(w) {
+    clear(el.result);
+    var today = todayInVietnam();
+    var head = h('section', 'panel');
+    head.appendChild(h('h2', 'welder-name', w.welderName));
+    head.appendChild(h('span', 'chip', t('welderId') + ': ' + w.welderId));
+    var sum = summarize(w.qualifications, today);
+    head.appendChild(h('p', 'summary', t('summary').replace('{n}', sum.valid).replace('{m}', sum.total)));
+    el.result.appendChild(head);
+
+    var list = h('div', 'cards');
+    var icons = { valid: '✔', dueSoon: '!', expiringSoon: '!', overdue: '!', expired: '✖', unknown: '?' };
+    w.qualifications.forEach(function (q) {
+      var s = computeStatus(q, today);
+      var card = h('article', 'card s-' + s);
+      var badge = h('span', 'badge');
+      var ico = h('span', 'ico'); ico.setAttribute('aria-hidden', 'true');
+      ico.appendChild(h('span', null, icons[s]));
+      badge.appendChild(ico);
+      badge.appendChild(h('span', null, t(s)));
+      card.appendChild(badge);
+      card.appendChild(h('h3', 'process', q.weldingProcess + ' · ' + q.weldingProcessCode));
+      var dl = h('dl');
+      addRow(dl, t('standard'), q.standard);
+      var wk = weldTypeKey(q.qualifiedType);
+      addRow(dl, t('weldType'), wk ? t(wk) : q.qualifiedType);
+      addRow(dl, t('lastValidation'), formatDate(q.lastValidationDate, lang));
+      addRow(dl, t('nextProlongation'), formatDate(q.nextProlongationDate, lang));
+      addRow(dl, t('expiry'), formatDate(q.expiryDate, lang));
+      card.appendChild(dl);
+      list.appendChild(card);
+    });
+    el.result.appendChild(list);
+  }
+
+  function showMessage(titleKey, textKey, retry) {
+    state = { view: 'message', titleKey: titleKey, textKey: textKey, retry: !!retry };
+    renderView();
+  }
+
+  // ---- API ----------------------------------------------------------------
+  function str(x, max) { return typeof x === 'string' && x.length <= (max || 200); }
+  function validateResponse(json, id) {
+    if (!json || typeof json !== 'object' || typeof json.ok !== 'boolean') { return { kind: 'error' }; }
+    if (!json.ok) {
+      if (json.error === 'Welder not found.') { return { kind: 'notFound' }; }
+      if (json.error === 'Invalid WelderID format.') { return { kind: 'invalid' }; }
+      return { kind: 'error' };
+    }
+    var w = json.welder;
+    if (!w || !str(w.welderId, 30) || w.welderId !== id || !str(w.welderName) || !Array.isArray(w.qualifications) || w.qualifications.length === 0 || w.qualifications.length > 50) {
+      return { kind: 'error' };
+    }
+    var quals = [];
+    for (var i = 0; i < w.qualifications.length; i++) {
+      var q = w.qualifications[i];
+      if (!q || !str(q.standard) || !str(q.weldingProcess) || !str(q.weldingProcessCode, 10) || !str(q.qualifiedType, 10) ||
+          !str(q.lastValidationDate, 10) || !str(q.nextProlongationDate, 10) || !str(q.expiryDate, 10)) { return { kind: 'error' }; }
+      quals.push({ standard: q.standard, weldingProcess: q.weldingProcess, weldingProcessCode: q.weldingProcessCode,
+        qualifiedType: q.qualifiedType, lastValidationDate: q.lastValidationDate,
+        nextProlongationDate: q.nextProlongationDate, expiryDate: q.expiryDate });
+    }
+    return { kind: 'ok', welder: { welderId: w.welderId, welderName: w.welderName, qualifications: quals } };
+  }
+
+  function lookup(id) {
+    lastId = id;
+    var seq = ++requestSeq;
+    state = { view: 'loading' };
+    renderView();
+    var ctrl = typeof AbortController === 'function' ? new AbortController() : null;
+    var timer = setTimeout(function () { if (ctrl) { ctrl.abort(); } }, REQUEST_TIMEOUT_MS);
+    fetch(API_URL + '?id=' + encodeURIComponent(id), {
+      cache: 'no-store', redirect: 'follow', referrerPolicy: 'no-referrer', signal: ctrl ? ctrl.signal : undefined
+    }).then(function (res) {
+      if (!res.ok) { throw new Error('http'); }
+      return res.json();
+    }).then(function (json) {
+      if (seq !== requestSeq) { return; }
+      var v = validateResponse(json, id);
+      if (v.kind === 'ok') { state = { view: 'result', welder: v.welder }; renderView(); }
+      else if (v.kind === 'notFound') { showMessage('notFoundTitle', 'notFoundText', false); }
+      else if (v.kind === 'invalid') { showMessage('invalidTitle', 'invalidText', false); }
+      else { showMessage('errorTitle', 'errorText', true); }
+    }).catch(function () {
+      if (seq !== requestSeq) { return; }
+      showMessage('errorTitle', 'errorText', true);
+    }).then(function () { clearTimeout(timer); });
+  }
+
+  function submitId(raw, pushToUrl) {
+    var id = String(raw || '').trim().toUpperCase();
+    el.input.value = id;
+    if (id === '') { state = { view: 'form' }; renderView(); return; }
+    if (!ID_PATTERN.test(id)) { requestSeq++; showMessage('invalidTitle', 'invalidText', false); return; }
+    if (pushToUrl && window.history && history.replaceState) {
+      try { history.replaceState(null, '', '?id=' + encodeURIComponent(id)); } catch (e) { /* ignore */ }
+    }
+    lookup(id);
+  }
+
+  // ---- events and start-up ---------------------------------------------------
+  el.form.addEventListener('submit', function (ev) { ev.preventDefault(); submitId(el.input.value, true); });
+  el.retry.addEventListener('click', function () { if (lastId) { lookup(lastId); } });
+  el.langBtn.addEventListener('click', function () {
+    lang = lang === 'en' ? 'vi' : 'en';
+    try { localStorage.setItem('wv-lang', lang); } catch (e) { /* storage may be unavailable */ }
+    renderStatic();
+    renderView();
+  });
+
+  (function init() {
+    var params = new URLSearchParams(window.location.search);
+    var wanted = params.get('lang');
+    var saved = null;
+    try { saved = localStorage.getItem('wv-lang'); } catch (e) { /* ignore */ }
+    var nav = (navigator.language || '').toLowerCase();
+    lang = (wanted === 'vi' || wanted === 'en') ? wanted : ((saved === 'vi' || saved === 'en') ? saved : (nav.indexOf('vi') === 0 ? 'vi' : 'en'));
+    renderStatic();
+    var id = params.get('id');
+    if (id) { submitId(id, false); } else { state = { view: 'form' }; renderView(); }
+  })();
+})();
+</script>
+</body>
+</html>
