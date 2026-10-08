@@ -116,7 +116,12 @@ table.legend-table th { white-space: nowrap; width: 5.5em; }
 <div class="wrap">
   <header class="top">
     <div class="brand">CS Wind Vietnam<small data-i18n="appTitle">Welder Qualification Verification</small></div>
-    <button id="langBtn" class="lang" type="button" aria-label="Language / Ngôn ngữ">Tiếng Việt</button>
+    <select id="langSel" class="lang" aria-label="Language / Ngôn ngữ / 语言 / 언어">
+      <option value="en">English</option>
+      <option value="vi">Tiếng Việt</option>
+      <option value="zh">简体中文</option>
+      <option value="ko">한국어</option>
+    </select>
   </header>
 
   <main id="main" aria-live="polite">
@@ -178,7 +183,7 @@ table.legend-table th { white-space: nowrap; width: 5.5em; }
       invalidTitle: 'Invalid Welder ID', invalidText: 'The Welder ID format is not valid. Example: CS171.',
       errorTitle: 'Could not load the data', errorText: 'Check your internet connection and try again.', retry: 'Try again',
       footer: "Data is refreshed once a day from the company's official welder register. For verification purposes only.",
-      checkedOn: 'Checked on {date}', langName: 'Tiếng Việt'
+      checkedOn: 'Checked on {date}', placeholder: 'e.g. CS171'
     },
     vi: {
       appTitle: 'Xác minh chứng chỉ thợ hàn',
@@ -199,15 +204,61 @@ table.legend-table th { white-space: nowrap; width: 5.5em; }
       invalidTitle: 'Mã thợ hàn không hợp lệ', invalidText: 'Định dạng mã thợ hàn không đúng. Ví dụ: CS171.',
       errorTitle: 'Không tải được dữ liệu', errorText: 'Vui lòng kiểm tra kết nối internet và thử lại.', retry: 'Thử lại',
       footer: 'Dữ liệu được cập nhật mỗi ngày từ sổ đăng ký thợ hàn chính thức của công ty. Chỉ dùng để xác minh.',
-      checkedOn: 'Kiểm tra ngày {date}', langName: 'English'
+      checkedOn: 'Kiểm tra ngày {date}', placeholder: 'ví dụ: CS171'
+    },
+    zh: {
+      appTitle: '焊工资质验证',
+      lookupLabel: '焊工编号', lookupButton: '查询', lookupHint: '请输入安全帽上印制的焊工编号。',
+      loading: '加载中…',
+      welderId: '焊工编号', summary: '有效资质：{n} / {m}',
+      standard: '标准', process: '焊接方法', weldType: '焊缝类型',
+      testDate: '试验日期', expiry: '有效期至',
+      baseMaterial: '认可母材', fillerMaterial: '认可填充材料',
+      thickness: '认可厚度范围', position: '认可焊接位置',
+      bw: '对接焊缝 (BW)', fw: '角焊缝 (FW)',
+      unrestricted: '不限', na: '不适用', toUnlimited: '{n} mm 至不限',
+      legendTitle: '图例：焊接位置与填充材料组别', legendPositions: '焊接位置代号', legendFiller: '填充材料组别',
+      photoAlt: '焊工照片', photoHint: '请核对照片与佩戴安全帽的本人是否一致。',
+      valid: '有效', expired: '无效（已过期）', notStarted: '无效（尚未生效）', unknown: '状态不可用',
+      notFoundTitle: '未找到公开记录',
+      notFoundText: '该焊工编号没有公开记录。请检查安全帽上的编号，或联系质量（QC）部门。',
+      invalidTitle: '焊工编号无效', invalidText: '焊工编号格式不正确。示例：CS171。',
+      errorTitle: '无法加载数据', errorText: '请检查网络连接后重试。', retry: '重试',
+      footer: '数据每天从公司正式焊工登记册更新一次，仅供核验使用。',
+      checkedOn: '查询日期：{date}', placeholder: '例如：CS171'
+    },
+    ko: {
+      appTitle: '용접사 자격 확인',
+      lookupLabel: '용접사 번호', lookupButton: '조회', lookupHint: '안전모에 인쇄된 용접사 번호를 입력하세요.',
+      loading: '불러오는 중…',
+      welderId: '용접사 번호', summary: '유효한 자격: {n} / {m}',
+      standard: '규격', process: '용접 방법', weldType: '용접부 종류',
+      testDate: '시험일', expiry: '유효기간 만료일',
+      baseMaterial: '인정 모재', fillerMaterial: '인정 용가재',
+      thickness: '인정 두께 범위', position: '인정 용접 자세',
+      bw: '맞대기 용접 (BW)', fw: '필릿 용접 (FW)',
+      unrestricted: '제한 없음', na: '해당 없음', toUnlimited: '{n} mm ~ 제한 없음',
+      legendTitle: '범례: 용접 자세 및 용가재 그룹', legendPositions: '용접 자세 기호', legendFiller: '용가재 그룹',
+      photoAlt: '용접사 사진', photoHint: '이 사진이 안전모를 착용한 본인과 일치하는지 확인하세요.',
+      valid: '유효', expired: '무효 (만료됨)', notStarted: '무효 (아직 효력 없음)', unknown: '상태 확인 불가',
+      notFoundTitle: '공개 기록을 찾을 수 없습니다',
+      notFoundText: '이 용접사 번호에 대한 공개 기록이 없습니다. 안전모에 표시된 번호를 확인하거나 QC 부서에 문의하세요.',
+      invalidTitle: '용접사 번호가 올바르지 않습니다', invalidText: '용접사 번호 형식이 올바르지 않습니다. 예: CS171.',
+      errorTitle: '데이터를 불러올 수 없습니다', errorText: '인터넷 연결을 확인한 후 다시 시도하세요.', retry: '다시 시도',
+      footer: '데이터는 회사의 공식 용접사 등록부에서 하루에 한 번 갱신됩니다. 확인 목적으로만 사용하세요.',
+      checkedOn: '확인 날짜: {date}', placeholder: '예: CS171'
     }
   };
   // Legend (from the company's qualification certificate): position code -> meaning, filler group -> steel family
   var LEGEND_POSITIONS = [['PA', '1G / 1F'], ['PB', '2F'], ['PC', '2G'], ['PF', '3G Up'], ['PE', '4G'], ['PH', '5G Up'], ['H-L045', '6G Up']];
   var LEGEND_FILLER = {
     en: [['FM1', 'Non-alloy and fine grain steels'], ['FM2', 'High-strength steels'], ['FM5', 'Stainless and heat-resisting steels']],
-    vi: [['FM1', 'Thép không hợp kim và thép hạt mịn'], ['FM2', 'Thép cường độ cao'], ['FM5', 'Thép không gỉ và thép chịu nhiệt']]
+    vi: [['FM1', 'Thép không hợp kim và thép hạt mịn'], ['FM2', 'Thép cường độ cao'], ['FM5', 'Thép không gỉ và thép chịu nhiệt']],
+    zh: [['FM1', '非合金钢和细晶粒钢'], ['FM2', '高强度钢'], ['FM5', '不锈钢和耐热钢']],
+    ko: [['FM1', '비합금강 및 세립강'], ['FM2', '고강도강'], ['FM5', '스테인리스강 및 내열강']]
   };
+  var LANGS = ['en', 'vi', 'zh', 'ko'];
+  var HTML_LANG = { en: 'en', vi: 'vi', zh: 'zh-CN', ko: 'ko' };
   var MONTHS_EN = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
   // <status-logic>
@@ -238,7 +289,10 @@ table.legend-table th { white-space: nowrap; width: 5.5em; }
   function formatDate(iso, lang) {
     if (!isIsoDate(iso)) { return '–'; }
     var p = iso.split('-');
-    return lang === 'vi' ? p[2] + '/' + p[1] + '/' + p[0] : p[2] + ' ' + MONTHS_EN[+p[1] - 1] + ' ' + p[0];
+    if (lang === 'vi') { return p[2] + '/' + p[1] + '/' + p[0]; }
+    if (lang === 'zh') { return p[0] + '年' + (+p[1]) + '月' + (+p[2]) + '日'; }
+    if (lang === 'ko') { return p[0] + '년 ' + (+p[1]) + '월 ' + (+p[2]) + '일'; }
+    return p[2] + ' ' + MONTHS_EN[+p[1] - 1] + ' ' + p[0];
   }
   function weldTypeKey(code) { return code === 'BW' ? 'bw' : (code === 'FW' ? 'fw' : null); }
   // Display text of the free-text qualification ranges (known words are translated, anything else is shown as stored)
@@ -267,7 +321,7 @@ table.legend-table th { white-space: nowrap; width: 5.5em; }
     message: document.getElementById('viewMessage'), result: document.getElementById('viewResult'),
     msgTitle: document.getElementById('msgTitle'), msgText: document.getElementById('msgText'),
     retry: document.getElementById('retryBtn'), form: document.getElementById('lookupForm'),
-    input: document.getElementById('welderId'), langBtn: document.getElementById('langBtn'),
+    input: document.getElementById('welderId'), langSel: document.getElementById('langSel'),
     checkedOn: document.getElementById('checkedOn')
   };
   var lang = 'en';
@@ -285,11 +339,11 @@ table.legend-table th { white-space: nowrap; width: 5.5em; }
   function clear(n) { while (n.firstChild) { n.removeChild(n.firstChild); } }
 
   function renderStatic() {
-    document.documentElement.lang = lang;
+    document.documentElement.lang = HTML_LANG[lang] || 'en';
     var nodes = document.querySelectorAll('[data-i18n]');
     for (var i = 0; i < nodes.length; i++) { nodes[i].textContent = t(nodes[i].getAttribute('data-i18n')); }
-    el.input.setAttribute('placeholder', lang === 'vi' ? 'ví dụ: CS171' : 'e.g. CS171');
-    el.langBtn.textContent = t('langName');
+    el.input.setAttribute('placeholder', t('placeholder'));
+    el.langSel.value = lang;
     document.title = t('appTitle');
     el.checkedOn.textContent = t('checkedOn').replace('{date}', formatDate(todayInVietnam(), lang));
   }
@@ -473,8 +527,8 @@ table.legend-table th { white-space: nowrap; width: 5.5em; }
   // ---- events and start-up ---------------------------------------------------
   el.form.addEventListener('submit', function (ev) { ev.preventDefault(); submitId(el.input.value, true); });
   el.retry.addEventListener('click', function () { if (lastId) { lookup(lastId); } });
-  el.langBtn.addEventListener('click', function () {
-    lang = lang === 'en' ? 'vi' : 'en';
+  el.langSel.addEventListener('change', function () {
+    lang = LANGS.indexOf(el.langSel.value) !== -1 ? el.langSel.value : 'en';
     try { localStorage.setItem('wv-lang', lang); } catch (e) { /* storage may be unavailable */ }
     renderStatic();
     renderView();
@@ -486,7 +540,9 @@ table.legend-table th { white-space: nowrap; width: 5.5em; }
     var saved = null;
     try { saved = localStorage.getItem('wv-lang'); } catch (e) { /* ignore */ }
     var nav = (navigator.language || '').toLowerCase();
-    lang = (wanted === 'vi' || wanted === 'en') ? wanted : ((saved === 'vi' || saved === 'en') ? saved : (nav.indexOf('vi') === 0 ? 'vi' : 'en'));
+    var fromNav = 'en';
+    for (var k = 0; k < LANGS.length; k++) { if (nav.indexOf(LANGS[k]) === 0) { fromNav = LANGS[k]; } }
+    lang = LANGS.indexOf(wanted) !== -1 ? wanted : (LANGS.indexOf(saved) !== -1 ? saved : fromNav);
     renderStatic();
     var id = params.get('id');
     if (id) { submitId(id, false); } else { state = { view: 'form' }; renderView(); }
